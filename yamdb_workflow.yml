@@ -58,7 +58,6 @@ jobs:
             message: |
               Ошибка при сборке/отправке образа на DockerHub-${{ github.repository }}
               https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-    
 
   deploy:
     runs-on: ubuntu-latest
@@ -73,7 +72,7 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             sudo docker compose stop
-            sudo docker compose rm web
+            sudo docker image rm duckin1/api_yamdb:latest
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
             echo DB_NAME=${{ secrets.DB_NAME }} >> .env
