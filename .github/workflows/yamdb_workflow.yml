@@ -18,10 +18,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         pip install -r requirements.txt
-    - name: Test with pytest
-      run: pytest
+
     - name: Test flake8
       run: flake8 api/ api_yamdb/ --exclude api/migrations/,api_yamdb/settings.py
+
+    - name: Test with pytest
+      run: pytest
+
   build_and_push_to_docker_hub:
       name: Push Docker image to Docker Hub
       runs-on: ubuntu-latest
@@ -29,13 +32,16 @@ jobs:
       steps:
         - name: Check out the repo
           uses: actions/checkout@v2
+
         - name: Set up Docker Buildx
           uses: docker/setup-buildx-action@v1
+
         - name: Login to Docker
           uses: docker/login-action@v1
           with:
             username: ${{ secrets.DOCKER_USERNAME }}
             password: ${{ secrets.DOCKER_PASSWORD }}
+
         - name: Push to Docker Hub
           uses: docker/build-push-action@v2
           with:
@@ -63,7 +69,17 @@ jobs:
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-            sudo docker-compose up -d 
+            sudo docker-compose up -d
+
+      - name: Send message if deploy failed
+        if: ${{ failure() }}
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            Ошибка при развёртке проекта На хосте - ${{ github.repository }}
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
   send_message:
     runs-on: ubuntu-latest
@@ -74,4 +90,4 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ${{ github.workflow }} успешно выполнен!
+          message: ${{ github.workflow }} успешно выполнен! Коммит  ${{ github.event.commits[0].message }}
