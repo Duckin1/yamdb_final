@@ -20,7 +20,7 @@ jobs:
         pip install -r requirements.txt
 
     - name: Test flake8
-      run: flake8 api/ api_yamdb/ --exclude api/migrations/,api_yamdb/settings.py
+      run: flake8
 
     - name: Test with pytest
       run: pytest
